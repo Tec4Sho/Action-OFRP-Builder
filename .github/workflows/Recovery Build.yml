@@ -18,7 +18,7 @@ on:
       DEVICE_TREE_BRANCH:
         description: 'DEVICE_TREE_BRANCH'
         required: true
-        default: 'android-9.0'
+        default: '9.0'
       DEVICE_PATH:
         description: 'DEVICE_PATH'
         required: true
@@ -67,10 +67,10 @@ jobs:
 
     - name: Prepare the build environment
       run: |
-        sudo apt update && sudo apt upgrade -y
-        DEBIAN_FRONTEND=noninteractive sudo apt install -yq \
+        sudo apt-get update && sudo apt-get upgrade -y && sudo add-apt-repository universe
+        DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
             linux-modules-extra-$(uname -r) \
-            git python3 tar aria2
+            git python3 tar aria2 git-core gnupg flex bison build-essential zip curl zlib1g-dev libc6-dev-i386 x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip lzma xz-utils fontconfig git repo
         git clone https://gitlab.com/OrangeFox/misc/scripts
         cd scripts
         sudo bash setup/android_build_env.sh
@@ -78,11 +78,27 @@ jobs:
         sudo bash setup/install_android_sdk.sh
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
+    - name: Install Python 2
+      if: github.event.inputs.MANIFEST_BRANCH = '9.0'
+      run: |
+        sudo apt-get -y remove python
+        sudo apt-get -y install python2
+        cd /usr/bin
+        sudo ln -sf python2 python
+      continue-on-error: true
+
+    - name: Install Git-Repo
+      run: |
+        mkdir ~/bin
+        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+        chmod a+x ~/bin/repo
+        sudo ln -sf ~/bin/repo /usr/bin/repo
+
     - name: Install OpenJDK
       uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
-        java-version: '11'
+        java-version: '8'
 
     - name: Setup SSH Keys
       if: ${{ startsWith(github.event.inputs.MANIFEST_URL, 'git@github.com') || 
@@ -90,7 +106,7 @@ jobs:
           startsWith(github.event.inputs.COMMON_TREE_URL, 'git@github.com') }}
       uses: webfactory/ssh-agent@v0.9.0
       with:
-          ssh-private-key: |
+          ssh-privateey: |
             ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Sync OrangeFox sources and minimal manifest
@@ -119,7 +135,7 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 12
+        swap-size-gb: 2
 
     - name: Building recovery
       run: |
@@ -127,6 +143,13 @@ jobs:
         set +e
         source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
+        export FOX_VANILLA_BUILD=1
+        export OF_DISABLE_MIUI_SPECIFIC_FEATURES=1
+        export OF_FORCE_PREBUILT_KERNEL=1
+        export FOX_BUILD_DEVICE=tb8163p3_bsp
+        export OF_PATCH_AVB20=1
+        export OF_USE_LZMA_COMPRESSION=1
+        export FOX_DRASTIC_SIZE_REDUCTION=1
         set -e
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && mka adbd ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
