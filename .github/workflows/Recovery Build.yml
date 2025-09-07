@@ -1,4 +1,4 @@
-name: Orange Recovery Build
+name: Orange Recovery Build 2025
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
       SYNC_URL:
         description: 'SYNC_URL'
         required: true
-        default: 'https://gitlab.com/OrangeFox/sync.git'
+        default: 'https://gitlab.com/OrangeFox/sync/legacy.git'
       MANIFEST_BRANCH:
         description: 'MANIFEST_BRANCH'
         required: true
@@ -23,12 +23,6 @@ on:
         description: 'DEVICE_PATH'
         required: true
         default: 'device/alps/tb8163p3_bsp'
-      COMMON_TREE_URL:
-        description: 'COMMON_TREE_URL (if no common tree, leave blank)'
-        required: false
-      COMMON_PATH:
-        description: 'COMMON_PATH (if no common tree, leave blank)'
-        required: false
       DEVICE_NAME:
         description: 'DEVICE_NAME'
         required: true
@@ -41,11 +35,17 @@ on:
         description: 'BUILD_TARGET'
         required: true
         default: 'recovery'
+      MAXIMIZE_BUILD_SPACE:
+        description: 'Cleans and remap storage paths'
+        type: boolean
+        required: false
+        default: true
 
 jobs:
   build:
-    if: github.event.repository.owner.id == github.event.sender.id
+    name: Build OrangeFox by ${{ github.actor }}
     runs-on: ubuntu-22.04
+    if: github.event.repository.owner.id == github.event.sender.id
     permissions:
       contents: write
     steps:
@@ -55,8 +55,23 @@ jobs:
       uses: actions/checkout@v4
 
     # Cleanup The Actions Workspace Using Custom Composite Run Actions
-    - name: Cleanup
+    - name: Cleanup build space
+      if: ${{ github.event.inputs.MAXIMIZE_BUILD_SPACE == true }}
       uses: rokibhasansagar/slimhub_actions@main
+      # That's it! Now use your normal steps  
+
+    - name: Maximize build space
+      if: ${{ github.event.inputs.MAXIMIZE_BUILD_SPACE == true }}
+      uses: easimon/maximize-build-space@master
+      with:
+        root-reserve-mb: 11000 # Example: Reserve 12 GB for the root directory
+        swap-size-mb: 2048 # Example: Reserve 4 GB for swap file
+        remove-dotnet: true # Example: Remove the .NET SDK to free space 
+      continue-on-error: true
+
+    - name: Create Ninja_log File
+      run: ninja -t restat
+      continue-on-error: true
 
     - name: Initialize workspace
       run: |
@@ -113,8 +128,8 @@ jobs:
       run: |
         cd ${{ steps.pwd.outputs.workspace-folder }}
         git clone ${{ github.event.inputs.SYNC_URL }}
-        cd sync
-        ./orangefox_sync.sh --branch ${{ github.event.inputs.MANIFEST_BRANCH }} --path ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
+        cd legacy
+        ./orangefox_sync_legacy.sh --branch ${{ github.event.inputs.MANIFEST_BRANCH }} --path ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
     - name: Clone device tree
@@ -123,20 +138,6 @@ jobs:
         mkdir -p ${{ github.event.inputs.DEVICE_PATH }}
         git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
-
-    - name: Clone common tree
-      if: |
-        github.event.inputs.COMMON_TREE_URL != null
-        && github.event.inputs.COMMON_PATH != null
-      run: |
-        cd ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
-        git clone ${{ github.event.inputs.COMMON_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.COMMON_PATH }}
-      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
-
-    - name: Set Swap Space
-      uses: pierotofy/set-swap-space@master
-      with:
-        swap-size-gb: 2
 
     - name: Building recovery
       run: |
