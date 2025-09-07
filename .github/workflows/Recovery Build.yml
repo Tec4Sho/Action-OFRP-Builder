@@ -37,6 +37,7 @@ on:
         default: 'recovery'
       MAXIMIZE_BUILD_SPACE:
         description: 'Cleans and remap storage paths'
+        type: boolean
         required: false
         default: true
 
@@ -66,19 +67,19 @@ jobs:
 
     # Cleanup The Actions Workspace Using Custom Composite Run Actions
     - name: Cleanup build space
-      if: ${{ github.event.inputs.MAXIMIZE_BUILD_SPACE == true }}
+      if: github.event.inputs.MAXIMIZE_BUILD_SPACE == 'true'
       uses: rokibhasansagar/slimhub_actions@main
       # That's it! Now use your normal steps  
 
     - name: Maximize build space
-      if: ${{ github.event.inputs.MAXIMIZE_BUILD_SPACE == true }}
+      if: github.event.inputs.MAXIMIZE_BUILD_SPACE == 'true'
       uses: easimon/maximize-build-space@master
       with:
         root-reserve-mb: 11000 # Example: Reserve 12 GB for the root directory
         swap-size-mb: 2048 # Example: Reserve 4 GB for swap file
-        remove-dotnet: true # Example: Remove the .NET SDK to free space 
+        remove-dotnet: 'true' # Example: Remove the .NET SDK to free space 
       continue-on-error: true
-
+        
     - name: Create Ninja_log File
       run: ninja -t restat
       continue-on-error: true
