@@ -4,39 +4,44 @@ on:
   workflow_dispatch:
     inputs:
       SYNC_URL:
-        description: 'SYNC_URL'
+        description: 'SYNC URL'
         required: true
         default: 'https://gitlab.com/OrangeFox/sync/legacy.git'
       MANIFEST_BRANCH:
-        description: 'MANIFEST_BRANCH'
+        description: 'MANIFEST BRANCH'
         required: true
         default: '9.0'
       DEVICE_TREE_URL:
-        description: 'DEVICE_TREE_URL'
+        description: 'DEVICE TREE URL'
         required: true
         default: 'https://github.com/Tec4Sho/android_device_alps_tb8163p3_bsp.git'
       DEVICE_TREE_BRANCH:
-        description: 'DEVICE_TREE_BRANCH'
+        description: 'DEVICE TREE BRANCH'
         required: true
         default: '9.0'
       DEVICE_PATH:
-        description: 'DEVICE_PATH'
+        description: 'DEVICE PATH'
         required: true
         default: 'device/alps/tb8163p3_bsp'
       DEVICE_NAME:
-        description: 'DEVICE_NAME'
+        description: 'DEVICE NAME'
         required: true
         default: 'tb8163p3_bsp'
       MAKEFILE_NAME:
-        description: 'MAKEFILE_NAME'
+        description: 'MAKEFILE NAME'
         required: true
         default: 'omni_tb8163p3_bsp'
       BUILD_TARGET:
-        description: 'BUILD_TARGET'
+        description: 'BUILD TARGET'
         required: true
         default: 'recovery'
+      USER_EMAIL:
+        description: 'USER EMAIL'
+        type: string
+        required: true
+        default: 'tec4sho@gmail.com'
       MAXIMIZE_BUILD_SPACE:
-        description: 'Cleans and remap storage paths'
+        description: 'MAXIMIZE BUILD SPACE'
         type: boolean
         required: false
         default: true
@@ -138,6 +143,8 @@ jobs:
     - name: Sync OrangeFox sources and minimal manifest
       run: |
         cd ${{ steps.pwd.outputs.workspace-folder }}
+        git config --global user.name "${{ github.actor }}"
+        git config --global user.email "${{ github.event.inputs.USER_EMAIL }}"
         git clone ${{ github.event.inputs.SYNC_URL }}
         cd legacy
         ./orangefox_sync_legacy.sh --branch ${{ github.event.inputs.MANIFEST_BRANCH }} --path ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
