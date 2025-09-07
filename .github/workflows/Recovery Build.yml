@@ -37,7 +37,6 @@ on:
         default: 'recovery'
       MAXIMIZE_BUILD_SPACE:
         description: 'Cleans and remap storage paths'
-        type: boolean
         required: false
         default: true
 
@@ -49,7 +48,18 @@ jobs:
     permissions:
       contents: write
     steps:
- 
+    - name: Display Inputs
+      run: |
+        echo "::group::User Environment Variables"
+        echo "Displaying main variables/inputs."
+        echo "Manifest Branch: ${{ github.event.inputs.MANIFEST_BRANCH }}"
+        echo "Device Tree: ${{ github.event.inputs.DEVICE_TREE }}"
+        echo "Device Branch: ${{ github.event.inputs.DEVICE_TREE_BRANCH }}"
+        echo "Device Path: ${{ github.event.inputs.DEVICE_PATH }}"
+        echo "Device Name: ${{ github.event.inputs.DEVICE_NAME }}"
+        echo "Build Target: ${{ github.event.inputs.BUILD_TARGET }}image"     
+        echo "::endgroup::"
+        
     # You might want to Checkout your repo first, but not mandatory
     - name: Check Out
       uses: actions/checkout@v4
@@ -94,7 +104,7 @@ jobs:
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
     - name: Install Python 2
-      if: github.event.inputs.MANIFEST_BRANCH = '9.0'
+      if: github.event.inputs.MANIFEST_BRANCH == '9.0'
       run: |
         sudo apt-get -y remove python
         sudo apt-get -y install python2
