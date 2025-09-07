@@ -158,6 +158,29 @@ jobs:
         git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
+    - name: Build Space
+      run: |
+        echo '### Before clean ###'
+        sudo df -h
+        echo
+        echo '### cleaning build environment space ###'
+        # clean build environment space
+        sudo apt-get remove -y kubectl powershell firefox dotnet-sdk-8.0 dotnet-runtime-8.0 azure-cli docker-ce libllvm13 libllvm14 libllvm15
+        sudo rm -vrf /usr/share/dotnet/ >/dev/null
+        echo '### After clean ###' 
+        sudo df -h
+        cd workspace
+        echo
+        echo '### Workspace directory ###'
+        sudo df . -h
+        echo
+        echo '### large files in workspace dir ###'
+        sudo find . -type f -size +100M -exec du -ha {} +
+      continue-on-error: true
+
+    - name: Workspace Contents
+      run: du ${GITHUB_WORKSPACE} -h -d 1
+      
     - name: Building recovery
       run: |
         cd ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
@@ -171,6 +194,7 @@ jobs:
         export OF_PATCH_AVB20=1
         export OF_USE_LZMA_COMPRESSION=1
         export FOX_DRASTIC_SIZE_REDUCTION=1
+        export LC_ALL=C
         set -e
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && mka adbd ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
