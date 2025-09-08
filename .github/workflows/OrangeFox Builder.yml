@@ -1,4 +1,4 @@
-name: Orange Recovery Build 2025
+name: OFRP Builder 2025
 
 on:
   workflow_dispatch:
