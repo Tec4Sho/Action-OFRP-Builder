@@ -194,6 +194,8 @@ jobs:
         export OF_PATCH_AVB20=1
         export OF_USE_LZMA_COMPRESSION=1
         export FOX_DRASTIC_SIZE_REDUCTION=1
+        export TARGET_SCREEN_HEIGHT=600
+        export TARGET_SCREEN_WIDTH=1024
         export LC_ALL=C
         set -e
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && mka adbd ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
