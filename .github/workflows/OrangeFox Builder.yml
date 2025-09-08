@@ -208,8 +208,7 @@ jobs:
 
     - name: Check if Recovery Exist
       run: |
-        cd workspace
-        if [ -f out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery.img ]; then
+        if [ -f  ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery.img ]; then
             echo "RECOVERY_TYPE=recovery" >> $GITHUB_ENV
             echo "recovery.img file found!"
             echo "MD5_IMG=$(md5sum out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
@@ -221,9 +220,13 @@ jobs:
             echo "RECOVERY_TYPE=vendor_boot" >> $GITHUB_ENV
             echo "vendor_boot.img file found!"
             echo "MD5_IMG=$(md5sum out/target/product/${{ github.event.inputs.DEVICE_NAME }}/vendor_boot.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
+        elif [ -f ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.img ]; then
+            echo "RECOVERY_TYPE=${{ github.event.inputs.BUILD_TARGET }}" >> $GITHUB_ENV
+            echo "${{ github.event.inputs.BUILD_TARGET }} file found!"
+            echo "MD5_IMG=$(md5sum out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
         else
             echo "No Recovery file found!"
-            cd Exit
+            exit 1
         fi
 
     - name: Output directory before uploading
