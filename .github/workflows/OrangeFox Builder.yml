@@ -182,9 +182,10 @@ jobs:
       run: |
         du ${GITHUB_WORKSPACE} -h -d 1
         # fix errors for missing ld.config.txt @ 99%
-        mkdir -p ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/tb8163p3_bsp/system/etc;
-        cp -v ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/recovery/root/sbin/ld.config.txt ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/tb8163p3_bsp/system/etc/ld.config.txt;
-   
+        mkdir -p ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/tb8163p3_bsp/system/etc/
+        cp -v ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/recovery/root/sbin/ld.config.txt ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/tb8163p3_bsp/system/etc/ld.config.txt
+        ls -a ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/tb8163p3_bsp/system/etc/ld.config.txt
+      
     - name: Building recovery
       run: |
         cd ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
