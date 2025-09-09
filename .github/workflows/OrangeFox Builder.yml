@@ -191,7 +191,6 @@ jobs:
       run: |
         cd ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         set +e
-        source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
         export FOX_VANILLA_BUILD=1
         export OF_DISABLE_MIUI_SPECIFIC_FEATURES=1
@@ -203,6 +202,7 @@ jobs:
         export TARGET_SCREEN_HEIGHT=600
         export TARGET_SCREEN_WIDTH=1024
         export LC_ALL=C
+        source build/envsetup.sh
         set -e
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && mka adbd ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
