@@ -189,10 +189,12 @@ jobs:
 
     - name: Workspace Contents
       run: |
-        du ${GITHUB_WORKSPACE} -h -d 4
-        cp -vrf ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/ofrp/theme/* ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/recovery/root/twres/
-        mv -f ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/default.prop /home/runner/work/Action-OFRP-Builder/Action-OFRP-Builder/workspace/fox_9.0/out/target/product/tb8163p3_bsp/recovery/root/
+        du ${GITHUB_WORKSPACE} -h -d 3
+        mkdir -p ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/tb8163p3_bsp/recovery/root/
+        cp -rf ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/ofrp/theme/* ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/recovery/root/twres/
+        mv-f ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/default.prop ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/tb8163p3_bsp/recovery/root/
         export FOX_VANILLA_BUILD=1
+      continue-on-error: true
         
     - name: Building recovery
       run: |
