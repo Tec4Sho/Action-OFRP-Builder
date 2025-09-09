@@ -190,6 +190,7 @@ jobs:
     - name: Workspace Contents
       run: |
         du ${GITHUB_WORKSPACE} -h -d 2
+        cp -Rf ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/ofrp/twres ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/recovery/root
         export FOX_VANILLA_BUILD=1
         
     - name: Building recovery
