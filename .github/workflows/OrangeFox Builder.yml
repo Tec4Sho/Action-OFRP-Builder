@@ -189,8 +189,9 @@ jobs:
 
     - name: Workspace Contents
       run: |
-        du ${GITHUB_WORKSPACE} -h -d 2
-        cp -rf ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/ofrp/twres/* ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/recovery/root/twres
+        du ${GITHUB_WORKSPACE} -h -d 4
+        cp -rf ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/ofrp/theme/* ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/recovery/root/twres/
+        cp -vf ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/default.prop /home/runner/work/Action-OFRP-Builder/Action-OFRP-Builder/workspace/fox_9.0/out/target/product/tb8163p3_bsp/recovery/root/
         export FOX_VANILLA_BUILD=1
         
     - name: Building recovery
