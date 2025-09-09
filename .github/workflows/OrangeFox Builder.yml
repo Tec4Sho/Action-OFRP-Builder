@@ -189,7 +189,7 @@ jobs:
 
     - name: Workspace Contents
       run: |
-        du ${GITHUB_WORKSPACE} -h -d 1
+        du ${GITHUB_WORKSPACE} -h -d 2
         export FOX_VANILLA_BUILD=1
         
     - name: Building recovery
