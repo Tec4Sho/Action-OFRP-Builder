@@ -85,11 +85,7 @@ jobs:
         swap-size-mb: 2048 # Example: Reserve 4 GB for swap file
         remove-dotnet: 'true' # Example: Remove the .NET SDK to free space 
       continue-on-error: true
-        
-    - name: Create Ninja_log File
-      run: ninja -t restat
-      continue-on-error: true
-
+      
     - name: Initialize workspace
       run: |
         mkdir workspace
@@ -109,8 +105,6 @@ jobs:
         sed -i 's/cd -/cd ../g' setup/install_android_sdk.sh
         sudo bash setup/install_android_sdk.sh
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
-
-      
 
     - name: Install Python 2
       if: github.event.inputs.MANIFEST_BRANCH == '9.0'
@@ -181,12 +175,6 @@ jobs:
         sudo find . -type f -size +100M -exec du -ha {} +
       continue-on-error: true
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 16.13.1
-      continue-on-error: true
-
     - name: Workspace Contents
       run: |
         du ${GITHUB_WORKSPACE} -h -d 3
@@ -213,6 +201,7 @@ jobs:
         export TARGET_SCREEN_WIDTH=1024
         export LC_ALL=C
         set -e
+        ninja -t restat
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && mka adbd ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
