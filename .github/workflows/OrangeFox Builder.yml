@@ -110,6 +110,8 @@ jobs:
         sudo bash setup/install_android_sdk.sh
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
+      
+
     - name: Install Python 2
       if: github.event.inputs.MANIFEST_BRANCH == '9.0'
       run: |
@@ -166,7 +168,7 @@ jobs:
         echo
         echo '### cleaning build environment space ###'
         # clean build environment space
-        sudo apt-get remove -qy kubectl powershell firefox dotnet-sdk-8.0 dotnet-runtime-8.0 azure-cli docker-ce libllvm13 libllvm15
+        sudo apt-get remove -qy kubectl powershell firefox dotnet-sdk-8.0 dotnet-runtime-8.0 azure-cli docker-ce libllvm13
         sudo rm -vrf /usr/share/dotnet/ >/dev/null
         echo '### After clean ###' 
         sudo df -h
@@ -179,18 +181,22 @@ jobs:
         sudo find . -type f -size +100M -exec du -ha {} +
       continue-on-error: true
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16.13.1
+      continue-on-error: true
+
     - name: Workspace Contents
       run: |
         du ${GITHUB_WORKSPACE} -h -d 1
-        # fix errors for missing ld.config.txt @ 99%
-        mkdir -p ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/tb8163p3_bsp/system/etc/
-        cp -v ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/recovery/root/sbin/ld.config.txt ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/tb8163p3_bsp/system/etc/ld.config.txt
-        ls -a ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/tb8163p3_bsp/system/etc/ld.config.txt
-      
+        export FOX_VANILLA_BUILD=1
+        
     - name: Building recovery
       run: |
         cd ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         set +e
+        source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
         export LLVM_ENABLE_THREADS=ON
         export FOX_VANILLA_BUILD=1
@@ -203,7 +209,6 @@ jobs:
         export TARGET_SCREEN_HEIGHT=600
         export TARGET_SCREEN_WIDTH=1024
         export LC_ALL=C
-        source build/envsetup.sh
         set -e
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && mka adbd ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
