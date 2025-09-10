@@ -162,7 +162,7 @@ jobs:
         echo
         echo '### cleaning build environment space ###'
         # clean build environment space
-        sudo apt-get remove -qy kubectl powershell firefox dotnet-sdk-8.0 dotnet-runtime-8.0 azure-cli docker-ce libllvm13
+        sudo apt-get remove -qy kubectl powershell firefox dotnet-sdk-8.0 dotnet-runtime-8.0 azure-cli docker-ce # libllvm13
         sudo rm -vrf /usr/share/dotnet/ >/dev/null
         echo '### After clean ###' 
         sudo df -h
@@ -181,20 +181,20 @@ jobs:
         mkdir -p ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/tb8163p3_bsp/recovery/root/
         cp -rf ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/ofrp/theme/* ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/recovery/root/twres/
         mv -f ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/${{ github.event.inputs.DEVICE_PATH }}/default.prop ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/tb8163p3_bsp/recovery/root/
-        export FOX_VANILLA_BUILD=1
       continue-on-error: true
         
     - name: Building recovery
       run: |
         cd ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         set +e
+        export RECOVERY_VARIANT="ofrp"
         source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
         #export LLVM_ENABLE_THREADS=OFF
         export FOX_VANILLA_BUILD=1
         export OF_DISABLE_MIUI_SPECIFIC_FEATURES=1
         export OF_FORCE_PREBUILT_KERNEL=1
-        export FOX_BUILD_DEVICE=tb8163p3_bsp
+        export FOX_BUILD_DEVICE="tb8163p3_bsp"
         export OF_USE_LZMA_COMPRESSION=1
         export FOX_DRASTIC_SIZE_REDUCTION=1
         export TARGET_SCREEN_HEIGHT=600
